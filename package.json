@@ -1,0 +1,25 @@
+{
+  "name": "movies-explorer-api",
+  "version": "1.0.0",
+  "description": "Diplom project",
+  "main": "index.js",
+  "scripts": {
+    "lint": "npx eslint .",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/space900/movies-explorer-api.git"
+  },
+  "author": "Andrey Khnykin",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/space900/movies-explorer-api/issues"
+  },
+  "homepage": "https://github.com/space900/movies-explorer-api#readme",
+  "dependencies": {
+    "eslint": "^8.2.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-plugin-import": "^2.25.3"
+  }
+}
