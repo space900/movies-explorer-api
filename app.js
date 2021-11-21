@@ -2,6 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const rateLimit = require('express-rate-limit');
 const usersRoutes = require('./bitfilmsdb/routes/users');
+const { login, createUser } = require('./bitfilmsdb/routes/users');
 const { auth } = require('./middlewares/auth');
 
 const { PORT = 3000 } = process.env;
@@ -18,6 +19,9 @@ mongoose.connect('mongodb://localhost:27017/moviesdb', {
 
 app.use(limiter);
 app.use(express.json());
+
+app.post('/signin', login);
+app.post('/signup', createUser);
 
 app.use('/', auth, usersRoutes);
 

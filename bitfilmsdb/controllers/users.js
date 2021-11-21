@@ -1,3 +1,4 @@
+const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
 const { NODE_ENV, JWT_SECRET } = process.env;
@@ -7,6 +8,7 @@ const messages = require('../../errors/messages');
 const NotFoundError = require('../../errors/classes/notFoundError');
 const BadRequestError = require('../../errors/classes/badRequestError');
 const UnauthorizedError = require('../../errors/classes/unauthorized');
+const ConflictError = require('../../errors/classes/conflictError');
 
 module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
@@ -23,6 +25,34 @@ module.exports.login = (req, res, next) => {
     .catch(() => {
       throw new UnauthorizedError(messages.BAD_LOGIN_OR_PSWRD);
     })
+    .catch(next);
+};
+
+module.exports.createUser = (req, res, next) => {
+  const {
+    name, email, password,
+  } = req.body;
+  User.findOne({ email })
+    .then((user) => {
+      if (user) {
+        throw new ConflictError(messages.BAD_REQUEST_EMAIL_CREATE);
+      } else {
+        return bcrypt.hash(password, 10);
+      }
+    })
+    .then((hash) => User.create({
+      name, email, password: hash,
+    })
+      .then((user) => res.status(200).send({
+        name: user.name, email,
+      }))
+      .catch((err) => {
+        if (err.name === 'ValidationError') {
+          throw new BadRequestError(messages.BAD_REQUEST);
+        } else {
+          next(err);
+        }
+      }))
     .catch(next);
 };
 
