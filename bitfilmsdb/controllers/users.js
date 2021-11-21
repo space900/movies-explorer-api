@@ -42,3 +42,19 @@ module.exports.getCurrentUser = (req, res, next) => {
     })
     .catch(next);
 };
+
+module.exports.updateUser = (req, res, next) => {
+  const { name } = req.body;
+  const id = req.user._id;
+
+  return User.findByIdAndUpdate(id, { name }, { new: true, runValidators: true })
+    .then((user) => res.send(user))
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        throw new BadRequestError(messages.NOT_FOUND);
+      } else {
+        next(err);
+      }
+    })
+    .catch(next);
+};
