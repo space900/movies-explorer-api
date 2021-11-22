@@ -56,6 +56,24 @@ module.exports.createUser = (req, res, next) => {
     .catch(next);
 };
 
+module.exports.getUserById = (req, res, next) => {
+  return User.findById(req.params.userId)
+    .then((user) => {
+      if (!user) {
+        throw new NotFoundError(messages.NOT_FOUND);
+      }
+      return res.status(200).send({ userData: user });
+    })
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        throw new BadRequestError(messages.BAD_REQUEST_EMAIL_CREATE);
+      } else {
+        next(err);
+      }
+    })
+    .catch(next);
+};
+
 module.exports.getCurrentUser = (req, res, next) => {
   User.findById(req.user._id)
     .then((user) => {

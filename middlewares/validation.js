@@ -24,3 +24,9 @@ module.exports.userValidation = celebrate({
     password: Joi.string().required(),
   }),
 });
+
+module.exports.userIdValidation = celebrate({
+  params: Joi.object().keys({
+    userId: Joi.string().required().hex().length(24),
+  }),
+});
