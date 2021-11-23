@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken');
 
 const { NODE_ENV, JWT_SECRET } = process.env;
 
+/* eslint-disable arrow-body-style */
 const User = require('../models/user');
 const messages = require('../../errors/messages');
 const NotFoundError = require('../../errors/classes/notFoundError');
@@ -43,9 +44,11 @@ module.exports.createUser = (req, res, next) => {
     .then((hash) => User.create({
       name, email, password: hash,
     })
-      .then((user) => res.status(200).send({
-        name: user.name, email,
-      }))
+      .then((user) => {
+        return res.status(200).send({
+          name: user.name, email,
+        });
+      })
       .catch((err) => {
         if (err.name === 'ValidationError') {
           throw new BadRequestError(messages.BAD_REQUEST);
