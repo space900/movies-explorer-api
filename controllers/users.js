@@ -5,11 +5,17 @@ const { NODE_ENV, JWT_SECRET } = process.env;
 
 /* eslint-disable arrow-body-style */
 const User = require('../models/user');
-const messages = require('../../errors/messages');
-const NotFoundError = require('../../errors/classes/notFoundError');
-const BadRequestError = require('../../errors/classes/badRequestError');
-const UnauthorizedError = require('../../errors/classes/unauthorized');
-const ConflictError = require('../../errors/classes/conflictError');
+const messages = require('../errors/messages');
+const NotFoundError = require('../errors/classes/notFoundError');
+const BadRequestError = require('../errors/classes/badRequestError');
+const UnauthorizedError = require('../errors/classes/unauthorized');
+const ConflictError = require('../errors/classes/conflictError');
+
+module.exports.getUsers = (req, res, next) => {
+  User.find({})
+    .then((users) => res.status(200).send({ allUsers: users }))
+    .catch(next);
+};
 
 module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
@@ -46,7 +52,7 @@ module.exports.createUser = (req, res, next) => {
     })
       .then((user) => {
         return res.status(200).send({
-          name: user.name, email,
+          name: user.name, email: user.email,
         });
       })
       .catch((err) => {
@@ -95,10 +101,10 @@ module.exports.getCurrentUser = (req, res, next) => {
 };
 
 module.exports.updateUser = (req, res, next) => {
-  const { name } = req.body;
+  const { name, email } = req.body;
   const id = req.user._id;
 
-  return User.findByIdAndUpdate(id, { name }, { new: true, runValidators: true })
+  return User.findByIdAndUpdate(id, { name, email }, { new: true, runValidators: true })
     .then((user) => res.send(user))
     .catch((err) => {
       if (err.name === 'ValidationError') {
@@ -108,4 +114,8 @@ module.exports.updateUser = (req, res, next) => {
       }
     })
     .catch(next);
+};
+
+module.exports.signOut = (req, res) => {
+  res.clearCookie('jwt').send({ message: 'cookies deleted' });
 };

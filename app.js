@@ -5,8 +5,11 @@ const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const cookieParser = require('cookie-parser');
 const { errors } = require('celebrate');
-const usersRoutes = require('./bitfilmsdb/routes/users');
-const { login, createUser } = require('./bitfilmsdb/controllers/users');
+const usersRoutes = require('./routes/users');
+const moviesRoutes = require('./routes/movies');
+const {
+  createUser, login,
+} = require('./controllers/users');
 const { auth } = require('./middlewares/auth');
 const { loginValidation, userValidation } = require('./middlewares/validation');
 const NotFoundError = require('./errors/classes/notFoundError');
@@ -32,7 +35,17 @@ app.use(express.json());
 app.post('/signin', loginValidation, login);
 app.post('/signup', userValidation, createUser);
 
+// router.post('/signup', userValidation, createUser);
+// router.post('/signin', loginValidation, login);
+// app.use(auth);
+// app.post('/signout', signOut);
+// app.use('/users', usersRoutes);
+
+// app.use(usersRouter);
+// app.use(auth, moviesRoutes);
+
 app.use('/', auth, usersRoutes);
+app.use('/', auth, moviesRoutes);
 
 app.use('*', () => {
   throw new NotFoundError(messages.SERVER_NOT_FOUND);
