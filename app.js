@@ -5,15 +5,8 @@ const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const cookieParser = require('cookie-parser');
 const { errors } = require('celebrate');
-const usersRoutes = require('./routes/users');
-const moviesRoutes = require('./routes/movies');
-const {
-  createUser, login,
-} = require('./controllers/users');
-const { auth } = require('./middlewares/auth');
-const { loginValidation, userValidation } = require('./middlewares/validation');
-const NotFoundError = require('./errors/classes/notFoundError');
-const messages = require('./errors/messages');
+const { requestLogger, errorLogger } = require('./middlewares/logger');
+const router = require('./routes/index');
 
 const { PORT = 3000 } = process.env;
 const app = express();
@@ -27,30 +20,13 @@ mongoose.connect('mongodb://localhost:27017/moviesdb', {
   useUnifiedTopology: true,
 });
 
+app.use(requestLogger);
 app.use(cookieParser());
 app.use(helmet());
+app.use(router);
 app.use(limiter);
 app.use(express.json());
-
-app.post('/signin', loginValidation, login);
-app.post('/signup', userValidation, createUser);
-
-// router.post('/signup', userValidation, createUser);
-// router.post('/signin', loginValidation, login);
-// app.use(auth);
-// app.post('/signout', signOut);
-// app.use('/users', usersRoutes);
-
-// app.use(usersRouter);
-// app.use(auth, moviesRoutes);
-
-app.use('/', auth, usersRoutes);
-app.use('/', auth, moviesRoutes);
-
-app.use('*', () => {
-  throw new NotFoundError(messages.SERVER_NOT_FOUND);
-});
-
+app.use(errorLogger);
 app.use(errors());
 
 app.use((err, req, res, next) => {

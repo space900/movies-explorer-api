@@ -11,12 +11,6 @@ const BadRequestError = require('../errors/classes/badRequestError');
 const UnauthorizedError = require('../errors/classes/unauthorized');
 const ConflictError = require('../errors/classes/conflictError');
 
-module.exports.getUsers = (req, res, next) => {
-  User.find({})
-    .then((users) => res.status(200).send({ allUsers: users }))
-    .catch(next);
-};
-
 module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
 
@@ -62,24 +56,6 @@ module.exports.createUser = (req, res, next) => {
           next(err);
         }
       }))
-    .catch(next);
-};
-
-module.exports.getUserById = (req, res, next) => {
-  return User.findById(req.params.userId)
-    .then((user) => {
-      if (!user) {
-        throw new NotFoundError(messages.NOT_FOUND);
-      }
-      return res.status(200).send({ userData: user });
-    })
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        throw new BadRequestError(messages.BAD_REQUEST_EMAIL_CREATE);
-      } else {
-        next(err);
-      }
-    })
     .catch(next);
 };
 
