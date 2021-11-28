@@ -7,5 +7,5 @@ module.exports = {
   BAD_REQUEST_EMAIL_CREATE: 'Данный email уже зарегистрирован',
   BAD_URL_VALIDATION: 'Неверный формат ссылки',
   SERVER_NOT_FOUND: 'Запрашиваемые данные не найдены',
-
+  SERVER_ERROR: 'На сервере произошла ошибка',
 };
