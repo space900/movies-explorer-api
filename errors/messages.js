@@ -8,4 +8,7 @@ module.exports = {
   BAD_URL_VALIDATION: 'Неверный формат ссылки',
   SERVER_NOT_FOUND: 'Запрашиваемые данные не найдены',
   SERVER_ERROR: 'На сервере произошла ошибка',
+  VALIDATION_ERROR: 'ValidationError',
+  CAST_ERROR: 'CastError',
+  MONGO_ERROR: 'MongoError',
 };

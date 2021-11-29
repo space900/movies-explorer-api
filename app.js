@@ -40,11 +40,11 @@ mongoose.connect(MONGO, {
 
 // app.options('*', cors());
 app.use(requestLogger);
+app.use(limiter);
 app.use(cookieParser());
 app.use(bodyparser.json());
 app.use(helmet());
 app.use(router);
-app.use(limiter);
 app.use(express.json());
 app.use(errorLogger);
 app.use(errors());

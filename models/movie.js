@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const isURL = require('validator/lib/isURL');
+const messages = require('../errors/messages');
 
 const movieSchema = new mongoose.Schema(
   {
@@ -31,7 +32,7 @@ const movieSchema = new mongoose.Schema(
           const isValid = isURL(v);
           return isValid;
         },
-        message: 'Неправильный формат ссылки',
+        message: messages.BAD_URL_VALIDATION,
       },
     },
     trailer: {
@@ -42,7 +43,7 @@ const movieSchema = new mongoose.Schema(
           const isValid = isURL(v);
           return isValid;
         },
-        message: 'Неправильный формат ссылки',
+        message: messages.BAD_URL_VALIDATION,
       },
     },
     thumbnail: {
@@ -53,7 +54,7 @@ const movieSchema = new mongoose.Schema(
           const isValid = isURL(v);
           return isValid;
         },
-        message: 'Неправильный формат ссылки',
+        message: messages.BAD_URL_VALIDATION,
       },
     },
     owner: {

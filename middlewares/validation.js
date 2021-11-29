@@ -16,7 +16,7 @@ module.exports.loginValidation = celebrate({
 
 module.exports.userValidation = celebrate({
   body: Joi.object().keys({
-    name: Joi.string().min(2).max(30),
+    name: Joi.string().required().min(2).max(30),
     email: Joi.string().required().email().custom((value) => {
       if (!isEmail(value)) {
         throw new CelebrateError(messages.BAD_REQUEST_EMAIL_CREATE);
@@ -35,7 +35,7 @@ module.exports.userIdValidation = celebrate({
 
 module.exports.userInfoValidation = celebrate({
   body: Joi.object().keys({
-    name: Joi.string().min(2).max(30),
+    name: Joi.string().required().min(2).max(30),
     email: Joi.string().required().email().custom((value) => {
       if (!isEmail(value)) {
         throw new CelebrateError(messages.BAD_REQUEST_EMAIL_CREATE);
