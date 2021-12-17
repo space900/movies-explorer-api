@@ -5,40 +5,40 @@ const helmet = require('helmet');
 const cookieParser = require('cookie-parser');
 const { errors } = require('celebrate');
 const bodyparser = require('body-parser');
+const cors = require('cors');
 const { requestLogger, errorLogger } = require('./middlewares/logger');
 const router = require('./routes/index');
 const { MONGO } = require('./utils/constants');
 const { errorHandler } = require('./middlewares/errors');
 const limiter = require('./middlewares/limiter');
-// const cors = require('cors');
 
 const { PORT = 3000 } = process.env;
 const app = express();
 
-// const allowedCors = [
-//   'https://space.nomoredomains.rocks',
-//   'https://api.space.nomoredomains.rocks',
-//   'http://localhost:3000',
-// ];
+const allowedCors = [
+  'http://space.nomoredomains.rocks',
+  'http://api.space.nomoredomains.rocks',
+  'http://localhost:3000',
+];
 
 mongoose.connect(MONGO, {
   useUnifiedTopology: true,
 });
 
-// app.use(
-//   cors({
-//     credentials: true,
-//     origin(origin, callback) {
-//       if (allowedCors.includes(origin) || !origin) {
-//         callback(null, true);
-//       } else {
-//         callback(new Error('Not allowed by CORS'));
-//       }
-//     },
-//   }),
-// );
+app.use(
+  cors({
+    credentials: true,
+    origin(origin, callback) {
+      if (allowedCors.includes(origin) || !origin) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
+  }),
+);
 
-// app.options('*', cors());
+app.options('*', cors());
 app.use(requestLogger);
 app.use(limiter);
 app.use(cookieParser());
