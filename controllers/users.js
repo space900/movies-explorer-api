@@ -8,6 +8,7 @@ const messages = require('../errors/messages');
 const BadRequestError = require('../errors/classes/badRequestError');
 const UnauthorizedError = require('../errors/classes/unauthorized');
 const ConflictError = require('../errors/classes/conflictError');
+const NotFoundError = require('../errors/classes/notFoundError');
 
 module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
@@ -15,7 +16,7 @@ module.exports.login = (req, res, next) => {
   return User.findUserByCredentials(email, password)
     .then((user) => {
       const token = jwt.sign({ _id: user._id }, JWT_SECRET, { expiresIn: '7d' });
-      return res.cookie('jwt', token, {
+      res.cookie('jwt', token, {
         maxAge: 3600000 * 24 * 7,
         httpOnly: true,
         sameSite: true,
@@ -42,9 +43,9 @@ module.exports.createUser = (req, res, next) => {
     .then((hash) => User.create({
       name, email, password: hash,
     })
-      .then((newUser) => {
+      .then((user) => {
         return res.status(200).send({
-          name: newUser.name, email: newUser.email,
+          name: user.name, email: user.email,
         });
       })
       .catch((err) => {
@@ -60,6 +61,9 @@ module.exports.createUser = (req, res, next) => {
 module.exports.getCurrentUser = (req, res, next) => {
   User.findById(req.user._id)
     .then((user) => {
+      if (!user) {
+        throw new NotFoundError();
+      }
       res.status(200).send(user);
     })
     .catch(next);
@@ -69,7 +73,7 @@ module.exports.updateUser = (req, res, next) => {
   const { name, email } = req.body;
   const id = req.user._id;
 
-  User.findByIdAndUpdate(id, { name, email }, { new: true, runValidators: true })
+  return User.findByIdAndUpdate(id, { name, email }, { new: true, runValidators: true })
     .then((user) => res.status(200).send(user))
     // eslint-disable-next-line consistent-return
     .catch((err) => {
