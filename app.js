@@ -19,6 +19,7 @@ const allowedCors = [
   'http://space.nomoredomains.rocks',
   'http://api.space.nomoredomains.rocks',
   'http://localhost:3000',
+  'http://localhost:3001',
 ];
 
 mongoose.connect(MONGO, {
@@ -39,9 +40,9 @@ app.use(
 );
 
 app.options('*', cors());
+app.use(cookieParser());
 app.use(requestLogger);
 app.use(limiter);
-app.use(cookieParser());
 app.use(bodyparser.json());
 app.use(helmet());
 app.use(router);
