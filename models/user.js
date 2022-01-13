@@ -1,50 +1,55 @@
 const mongoose = require('mongoose');
+const validator = require('validator');
 const bcrypt = require('bcrypt');
-const isEmail = require('validator/lib/isEmail');
-const messages = require('../errors/messages');
-const UnauthorizedError = require('../errors/classes/unauthorized');
 
-const userSchema = new mongoose.Schema(
-  {
-    name: {
-      type: String,
-      required: true,
-      minlength: 2,
-      maxlength: 30,
-    },
-    email: {
-      type: String,
-      required: true,
-      unique: true,
-      validate: {
-        validator: (v) => {
-          const isValid = isEmail(v);
-          return isValid;
-        },
-        message: 'Неправильный формат почты',
+const StatusMessages = require('../utils/status-messages');
+
+const userSchema = new mongoose.Schema({
+  email: {
+    type: String,
+    required: true,
+    unique: true,
+    validate: {
+      validator(email) {
+        return validator.isEmail(email);
       },
     },
-    password: {
-      type: String,
-      required: true,
-      select: false,
-      minlength: 8,
-    },
   },
-  { versionKey: false },
-);
+  password: {
+    type: String,
+    required: true,
+    select: false,
+    minlength: 8,
+  },
+  name: {
+    type: String,
+    required: true,
+    minlength: 2,
+    maxlength: 30,
+  },
+});
 
-userSchema.statics.findUserByCredentials = function findUser(email, password) {
+function toJSON() {
+  const obj = this.toObject();
+  delete obj.password;
+  return obj;
+}
+
+userSchema.methods.toJSON = toJSON;
+
+userSchema.statics.findUserByCredentials = function (email, password) {
   return this.findOne({ email }).select('+password')
     .then((user) => {
       if (!user) {
-        return Promise.reject(new UnauthorizedError(messages.BAD_LOGIN_OR_PSWRD));
+        return Promise.reject(new Error(StatusMessages.INVALID_CREDENTIALS));
       }
+
       return bcrypt.compare(password, user.password)
         .then((matched) => {
           if (!matched) {
-            return Promise.reject(new UnauthorizedError(messages.BAD_LOGIN_OR_PSWRD));
+            return Promise.reject(new Error(StatusMessages.INVALID_CREDENTIALS));
           }
+
           return user;
         });
     });

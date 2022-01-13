@@ -1,57 +1,57 @@
 require('dotenv').config();
 const express = require('express');
-const mongoose = require('mongoose');
 const helmet = require('helmet');
+const cors = require('cors');
+const mongoose = require('mongoose');
 const cookieParser = require('cookie-parser');
 const { errors } = require('celebrate');
-const bodyparser = require('body-parser');
-const cors = require('cors');
+
+const { MONGO_URL } = require('./utils/constants');
 const { requestLogger, errorLogger } = require('./middlewares/logger');
-const router = require('./routes/index');
-const { MONGO } = require('./utils/constants');
-const { errorHandler } = require('./middlewares/errors');
-const limiter = require('./middlewares/limiter');
+const rateLimiter = require('./middlewares/rateLimiter');
+const errorHandler = require('./middlewares/errorHandler');
 
-const { PORT = 3000 } = process.env;
-const app = express();
-
-const allowedCors = [
-  'http://space.nomoredomains.rocks',
-  'http://api.space.nomoredomains.rocks',
-  'http://localhost:3000',
-  'http://localhost:3001',
-];
-
-mongoose.connect(MONGO, {
+mongoose.connect(MONGO_URL, {
+  useNewUrlParser: true,
   useUnifiedTopology: true,
 });
 
+const { PORT = 3000 } = process.env;
+
+const app = express();
+
+app.use(requestLogger);
+
 app.use(
+  rateLimiter,
+  helmet(),
   cors({
     credentials: true,
-    origin(origin, callback) {
-      if (allowedCors.includes(origin) || !origin) {
-        callback(null, true);
-      } else {
-        callback(new Error('Not allowed by CORS'));
-      }
-    },
+    origin: [
+      'https://space.nomoredomains.rocks',
+      'https://api.space.nomoredomains.rocks',
+      'http://localhost:3000',
+      'http://localhost:3001',
+    ],
   }),
 );
 
-app.options('*', cors());
-app.use(cookieParser());
-app.use(requestLogger);
-app.use(limiter);
-app.use(bodyparser.json());
-app.use(helmet());
-app.use(router);
-app.use(express.json());
-app.use(errorLogger);
-app.use(errors());
-app.use(errorHandler);
+app.options('*', cors()); // preflight request
 
-app.listen(PORT, () => {
-  // eslint-disable-next-line no-console
-  console.log(`App is running on port ${PORT}`);
-});
+app.use(cookieParser());
+app.use(express.json());
+app.use(express.urlencoded({
+  extended: true,
+}));
+
+app.use('/', require('./routes'));
+
+app.use(errorLogger);
+
+app.use(
+  errors(),
+  errorHandler,
+);
+
+app.listen(PORT);
+

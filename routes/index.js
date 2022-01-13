@@ -1,26 +1,22 @@
 const router = require('express').Router();
-// const { auth } = require('../middlewares/auth');
-const usersRouter = require('./users');
-const moviesRouter = require('./movies');
-// const {
-//   createUser, login, signOut,
-// } = require('../controllers/users');
-// const { userValidation, loginValidation } = require('../middlewares/validation');
-const NotFoundError = require('../errors/classes/notFoundError');
-const messages = require('../errors/messages');
 
-router.use(usersRouter);
-router.use(moviesRouter);
+const { createUser, login, signOut } = require('../controllers/users');
 
-// router.post('/signup', userValidation, createUser);
-// router.post('/signin', loginValidation, login);
-// router.use(auth);
-// router.post('/signout', signOut);
-// router.use('/', usersRouter);
-// router.use('/', moviesRouter);
+const authCheck = require('../middlewares/auth');
+const { validateSignup, validateSignin } = require('../middlewares/validators');
 
-router.use('*', () => {
-  throw new NotFoundError(messages.NOT_FOUND);
+const { NotFoundError } = require('../errors');
+
+router.post('/signup', validateSignup, createUser);
+router.post('/signin', validateSignin, login);
+router.delete('/signout', signOut);
+
+router.use(authCheck);
+router.use('/users', require('./users'));
+router.use('/movies', require('./movies'));
+
+router.all('*', (req, res, next) => {
+  next(new NotFoundError('Ошибка 404, нет такой страницы'));
 });
 
 module.exports = router;
